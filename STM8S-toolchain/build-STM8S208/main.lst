@@ -1,0 +1,549 @@
+                                      1 ;--------------------------------------------------------
+                                      2 ; File Created by SDCC : free open source ISO C Compiler 
+                                      3 ; Version 4.4.0 #14620 (Linux)
+                                      4 ;--------------------------------------------------------
+                                      5 	.module main
+                                      6 	.optsdcc -mstm8
+                                      7 	
+                                      8 ;--------------------------------------------------------
+                                      9 ; Public variables in this module
+                                     10 ;--------------------------------------------------------
+                                     11 	.globl _main
+                                     12 	.globl _init_uart1
+                                     13 	.globl _ADC2_Startup_Wait
+                                     14 	.globl _ADC2_AlignConfig
+                                     15 	.globl _ADC2_Select_Channel
+                                     16 	.globl _ADC_get
+                                     17 	.globl _printf
+                                     18 	.globl _milis
+                                     19 	.globl _init_milis
+                                     20 	.globl _GPIO_Init
+                                     21 	.globl _CLK_HSIPrescalerConfig
+                                     22 	.globl _ADC2_SchmittTriggerConfig
+                                     23 	.globl _ADC2_PrescalerConfig
+                                     24 	.globl _ADC2_Cmd
+                                     25 	.globl _init
+                                     26 ;--------------------------------------------------------
+                                     27 ; ram data
+                                     28 ;--------------------------------------------------------
+                                     29 	.area DATA
+                                     30 ;--------------------------------------------------------
+                                     31 ; ram data
+                                     32 ;--------------------------------------------------------
+                                     33 	.area INITIALIZED
+                                     34 ;--------------------------------------------------------
+                                     35 ; Stack segment in internal ram
+                                     36 ;--------------------------------------------------------
+                                     37 	.area SSEG
+      000000                         38 __start__stack:
+      000000                         39 	.ds	1
+                                     40 
+                                     41 ;--------------------------------------------------------
+                                     42 ; absolute external ram data
+                                     43 ;--------------------------------------------------------
+                                     44 	.area DABS (ABS)
+                                     45 
+                                     46 ; default segment ordering for linker
+                                     47 	.area HOME
+                                     48 	.area GSINIT
+                                     49 	.area GSFINAL
+                                     50 	.area CONST
+                                     51 	.area INITIALIZER
+                                     52 	.area CODE
+                                     53 
+                                     54 ;--------------------------------------------------------
+                                     55 ; interrupt vector
+                                     56 ;--------------------------------------------------------
+                                     57 	.area HOME
+      000000                         58 __interrupt_vect:
+      000000 82v00u00u00             59 	int s_GSINIT ; reset
+      000004 82v00u00u00             60 	int _TRAP_IRQHandler ; trap
+      000008 82v00u00u00             61 	int _TLI_IRQHandler ; int0
+      00000C 82v00u00u00             62 	int _AWU_IRQHandler ; int1
+      000010 82v00u00u00             63 	int _CLK_IRQHandler ; int2
+      000014 82v00u00u00             64 	int _EXTI_PORTA_IRQHandler ; int3
+      000018 82v00u00u00             65 	int _EXTI_PORTB_IRQHandler ; int4
+      00001C 82v00u00u00             66 	int _EXTI_PORTC_IRQHandler ; int5
+      000020 82v00u00u00             67 	int _EXTI_PORTD_IRQHandler ; int6
+      000024 82v00u00u00             68 	int _EXTI_PORTE_IRQHandler ; int7
+      000028 82v00u00u00             69 	int _CAN_RX_IRQHandler ; int8
+      00002C 82v00u00u00             70 	int _CAN_TX_IRQHandler ; int9
+      000030 82v00u00u00             71 	int _SPI_IRQHandler ; int10
+      000034 82v00u00u00             72 	int _TIM1_UPD_OVF_TRG_BRK_IRQHandler ; int11
+      000038 82v00u00u00             73 	int _TIM1_CAP_COM_IRQHandler ; int12
+      00003C 82v00u00u00             74 	int _TIM2_UPD_OVF_BRK_IRQHandler ; int13
+      000040 82v00u00u00             75 	int _TIM2_CAP_COM_IRQHandler ; int14
+      000044 82v00u00u00             76 	int _TIM3_UPD_OVF_BRK_IRQHandler ; int15
+      000048 82v00u00u00             77 	int _TIM3_CAP_COM_IRQHandler ; int16
+      00004C 82v00u00u00             78 	int _UART1_TX_IRQHandler ; int17
+      000050 82v00u00u00             79 	int _UART1_RX_IRQHandler ; int18
+      000054 82v00u00u00             80 	int _I2C_IRQHandler ; int19
+      000058 82v00u00u00             81 	int _UART3_TX_IRQHandler ; int20
+      00005C 82v00u00u00             82 	int _UART3_RX_IRQHandler ; int21
+      000060 82v00u00u00             83 	int _ADC2_IRQHandler ; int22
+      000064 82v00u00u00             84 	int _TIM4_UPD_OVF_IRQHandler ; int23
+      000068 82v00u00u00             85 	int _EEPROM_EEC_IRQHandler ; int24
+                                     86 ;--------------------------------------------------------
+                                     87 ; global & static initialisations
+                                     88 ;--------------------------------------------------------
+                                     89 	.area HOME
+                                     90 	.area GSINIT
+                                     91 	.area GSFINAL
+                                     92 	.area GSINIT
+      000000 CDr00r00         [ 4]   93 	call	___sdcc_external_startup
+      000003 4D               [ 1]   94 	tnz	a
+      000004 27 03            [ 1]   95 	jreq	__sdcc_init_data
+      000006 CCr00r6C         [ 2]   96 	jp	__sdcc_program_startup
+      000009                         97 __sdcc_init_data:
+                                     98 ; stm8_genXINIT() start
+      000009 AEr00r00         [ 2]   99 	ldw x, #l_DATA
+      00000C 27 07            [ 1]  100 	jreq	00002$
+      00000E                        101 00001$:
+      00000E 72 4FuFFuFF      [ 1]  102 	clr (s_DATA - 1, x)
+      000012 5A               [ 2]  103 	decw x
+      000013 26 F9            [ 1]  104 	jrne	00001$
+      000015                        105 00002$:
+      000015 AEr00r00         [ 2]  106 	ldw	x, #l_INITIALIZER
+      000018 27 09            [ 1]  107 	jreq	00004$
+      00001A                        108 00003$:
+      00001A D6uFFuFF         [ 1]  109 	ld	a, (s_INITIALIZER - 1, x)
+      00001D D7uFFuFF         [ 1]  110 	ld	(s_INITIALIZED - 1, x), a
+      000020 5A               [ 2]  111 	decw	x
+      000021 26 F7            [ 1]  112 	jrne	00003$
+      000023                        113 00004$:
+                                    114 ; stm8_genXINIT() end
+                                    115 	.area GSFINAL
+      000000 CCr00r6C         [ 2]  116 	jp	__sdcc_program_startup
+                                    117 ;--------------------------------------------------------
+                                    118 ; Home
+                                    119 ;--------------------------------------------------------
+                                    120 	.area HOME
+                                    121 	.area HOME
+      00006C                        122 __sdcc_program_startup:
+      00006C CCr00r86         [ 2]  123 	jp	_main
+                                    124 ;	return from main will return to caller
+                                    125 ;--------------------------------------------------------
+                                    126 ; code
+                                    127 ;--------------------------------------------------------
+                                    128 	.area CODE
+                                    129 ;	inc/delay.h: 18: static @inline void _delay_cycl( unsigned short __ticks )
+                                    130 ; genLabel
+                                    131 ;	-----------------------------------------
+                                    132 ;	 function _delay_cycl
+                                    133 ;	-----------------------------------------
+                                    134 ;	Register assignment is optimal.
+                                    135 ;	Stack space usage: 0 bytes.
+      000000                        136 __delay_cycl:
+                                    137 ; genReceive
+                                    138 ;	inc/delay.h: 29: __asm__("nop\n nop\n"); 
+                                    139 ;	genInline
+      000000 9D               [ 1]  140 	nop
+      000001 9D               [ 1]  141 	nop
+                                    142 ;	inc/delay.h: 30: do { 		// ASM: ldw X, #tick; lab$: decw X; tnzw X; jrne lab$
+                                    143 ; genAssign
+                                    144 ; genLabel
+      000002                        145 00101$:
+                                    146 ;	inc/delay.h: 31: __ticks--;//      2c;                 1c;     2c    ; 1/2c   
+                                    147 ; genMinus
+      000002 5A               [ 2]  148 	decw	x
+                                    149 ;	inc/delay.h: 32: } while ( __ticks );
+                                    150 ; genIfx
+      000003 5D               [ 2]  151 	tnzw	x
+      000004 27 03            [ 1]  152 	jreq	00121$
+      000006 CCr00r02         [ 2]  153 	jp	00101$
+      000009                        154 00121$:
+                                    155 ;	inc/delay.h: 33: __asm__("nop\n");
+                                    156 ;	genInline
+      000009 9D               [ 1]  157 	nop
+                                    158 ; genLabel
+      00000A                        159 00104$:
+                                    160 ;	inc/delay.h: 43: }
+                                    161 ; genEndFunction
+      00000A 81               [ 4]  162 	ret
+                                    163 ;	inc/delay.h: 45: static @inline void _delay_us( const unsigned short __us ){
+                                    164 ; genLabel
+                                    165 ;	-----------------------------------------
+                                    166 ;	 function _delay_us
+                                    167 ;	-----------------------------------------
+                                    168 ;	Register assignment might be sub-optimal.
+                                    169 ;	Stack space usage: 0 bytes.
+      00000B                        170 __delay_us:
+                                    171 ; genReceive
+                                    172 ;	inc/delay.h: 46: _delay_cycl( (unsigned short)( T_COUNT(__us) ));
+                                    173 ; genCast
+                                    174 ; genAssign
+      00000B 90 5F            [ 1]  175 	clrw	y
+                                    176 ; genIPush
+      00000D 89               [ 2]  177 	pushw	x
+      00000E 90 89            [ 2]  178 	pushw	y
+                                    179 ; genIPush
+      000010 4B 00            [ 1]  180 	push	#0x00
+      000012 4B 24            [ 1]  181 	push	#0x24
+      000014 4B F4            [ 1]  182 	push	#0xf4
+      000016 4B 00            [ 1]  183 	push	#0x00
+                                    184 ; genCall
+      000018 CDr00r00         [ 4]  185 	call	__mullong
+      00001B 5B 08            [ 2]  186 	addw	sp, #8
+                                    187 ; genCast
+                                    188 ; genAssign
+                                    189 ; genIPush
+      00001D 4B 40            [ 1]  190 	push	#0x40
+      00001F 4B 42            [ 1]  191 	push	#0x42
+      000021 4B 0F            [ 1]  192 	push	#0x0f
+      000023 4B 00            [ 1]  193 	push	#0x00
+                                    194 ; genIPush
+      000025 89               [ 2]  195 	pushw	x
+      000026 90 89            [ 2]  196 	pushw	y
+                                    197 ; genCall
+      000028 CDr00r00         [ 4]  198 	call	__divulong
+      00002B 5B 08            [ 2]  199 	addw	sp, #8
+                                    200 ; genRightShiftLiteral
+      00002D 90 54            [ 2]  201 	srlw	y
+      00002F 56               [ 2]  202 	rrcw	x
+      000030 90 54            [ 2]  203 	srlw	y
+      000032 56               [ 2]  204 	rrcw	x
+      000033 90 54            [ 2]  205 	srlw	y
+      000035 56               [ 2]  206 	rrcw	x
+                                    207 ; genCast
+                                    208 ; genAssign
+                                    209 ; genPlus
+      000036 5C               [ 1]  210 	incw	x
+                                    211 ;	inc/delay.h: 29: __asm__("nop\n nop\n"); 
+                                    212 ;	genInline
+      000037 9D               [ 1]  213 	nop
+      000038 9D               [ 1]  214 	nop
+                                    215 ;	inc/delay.h: 30: do { 		// ASM: ldw X, #tick; lab$: decw X; tnzw X; jrne lab$
+                                    216 ; genAssign
+                                    217 ; genLabel
+      000039                        218 00101$:
+                                    219 ;	inc/delay.h: 31: __ticks--;//      2c;                 1c;     2c    ; 1/2c   
+                                    220 ; genMinus
+      000039 5A               [ 2]  221 	decw	x
+                                    222 ;	inc/delay.h: 32: } while ( __ticks );
+                                    223 ; genIfx
+      00003A 5D               [ 2]  224 	tnzw	x
+      00003B 27 03            [ 1]  225 	jreq	00122$
+      00003D CCr00r39         [ 2]  226 	jp	00101$
+      000040                        227 00122$:
+                                    228 ;	inc/delay.h: 33: __asm__("nop\n");
+                                    229 ;	genInline
+      000040 9D               [ 1]  230 	nop
+                                    231 ;	inc/delay.h: 46: _delay_cycl( (unsigned short)( T_COUNT(__us) ));
+                                    232 ; genLabel
+      000041                        233 00105$:
+                                    234 ;	inc/delay.h: 47: }
+                                    235 ; genEndFunction
+      000041 81               [ 4]  236 	ret
+                                    237 ;	./src/main.c: 11: void init(void) {
+                                    238 ; genLabel
+                                    239 ;	-----------------------------------------
+                                    240 ;	 function init
+                                    241 ;	-----------------------------------------
+                                    242 ;	Register assignment is optimal.
+                                    243 ;	Stack space usage: 0 bytes.
+      000042                        244 _init:
+                                    245 ;	./src/main.c: 12: CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV1); // taktovani MCU na 16MHz
+                                    246 ; genSend
+      000042 4F               [ 1]  247 	clr	a
+                                    248 ; genCall
+      000043 CDr00r00         [ 4]  249 	call	_CLK_HSIPrescalerConfig
+                                    250 ;	./src/main.c: 14: GPIO_Init(LED_PORT, LED_PIN, GPIO_MODE_OUT_PP_LOW_SLOW);
+                                    251 ; genIPush
+      000046 4B C0            [ 1]  252 	push	#0xc0
+                                    253 ; genSend
+      000048 A6 20            [ 1]  254 	ld	a, #0x20
+                                    255 ; genSend
+      00004A AE 50 0A         [ 2]  256 	ldw	x, #0x500a
+                                    257 ; genCall
+      00004D CDr00r00         [ 4]  258 	call	_GPIO_Init
+                                    259 ;	./src/main.c: 16: GPIO_Init(BTN_PORT, BTN_PIN, GPIO_MODE_IN_FL_NO_IT);
+                                    260 ; genIPush
+      000050 4B 00            [ 1]  261 	push	#0x00
+                                    262 ; genSend
+      000052 A6 10            [ 1]  263 	ld	a, #0x10
+                                    264 ; genSend
+      000054 AE 50 14         [ 2]  265 	ldw	x, #0x5014
+                                    266 ; genCall
+      000057 CDr00r00         [ 4]  267 	call	_GPIO_Init
+                                    268 ;	./src/main.c: 18: ADC2_SchmittTriggerConfig(ADC2_SCHMITTTRIG_CHANNEL14, DISABLE);
+                                    269 ; genIPush
+      00005A 4B 00            [ 1]  270 	push	#0x00
+                                    271 ; genSend
+      00005C A6 0E            [ 1]  272 	ld	a, #0x0e
+                                    273 ; genCall
+      00005E CDr00r00         [ 4]  274 	call	_ADC2_SchmittTriggerConfig
+                                    275 ;	./src/main.c: 19: ADC2_SchmittTriggerConfig(ADC2_SCHMITTTRIG_CHANNEL15, DISABLE);
+                                    276 ; genIPush
+      000061 4B 00            [ 1]  277 	push	#0x00
+                                    278 ; genSend
+      000063 A6 0F            [ 1]  279 	ld	a, #0x0f
+                                    280 ; genCall
+      000065 CDr00r00         [ 4]  281 	call	_ADC2_SchmittTriggerConfig
+                                    282 ;	./src/main.c: 22: ADC2_PrescalerConfig(ADC2_PRESSEL_FCPU_D4);
+                                    283 ; genSend
+      000068 A6 20            [ 1]  284 	ld	a, #0x20
+                                    285 ; genCall
+      00006A CDr00r00         [ 4]  286 	call	_ADC2_PrescalerConfig
+                                    287 ;	./src/main.c: 24: ADC2_AlignConfig(ADC2_ALIGN_RIGHT);
+                                    288 ; genSend
+      00006D A6 08            [ 1]  289 	ld	a, #0x08
+                                    290 ; genCall
+      00006F CDr00r00         [ 4]  291 	call	_ADC2_AlignConfig
+                                    292 ;	./src/main.c: 26: ADC2_Select_Channel(ADC2_CHANNEL_14);
+                                    293 ; genSend
+      000072 A6 0E            [ 1]  294 	ld	a, #0x0e
+                                    295 ; genCall
+      000074 CDr00r00         [ 4]  296 	call	_ADC2_Select_Channel
+                                    297 ;	./src/main.c: 28: ADC2_Cmd(ENABLE);
+                                    298 ; genSend
+      000077 A6 01            [ 1]  299 	ld	a, #0x01
+                                    300 ; genCall
+      000079 CDr00r00         [ 4]  301 	call	_ADC2_Cmd
+                                    302 ;	./src/main.c: 30: ADC2_Startup_Wait();
+                                    303 ; genCall
+      00007C CDr00r00         [ 4]  304 	call	_ADC2_Startup_Wait
+                                    305 ;	./src/main.c: 32: init_milis();
+                                    306 ; genCall
+      00007F CDr00r00         [ 4]  307 	call	_init_milis
+                                    308 ;	./src/main.c: 33: init_uart1();
+                                    309 ; genCall
+      000082 CCr00r00         [ 2]  310 	jp	_init_uart1
+                                    311 ; genLabel
+      000085                        312 00101$:
+                                    313 ;	./src/main.c: 34: }
+                                    314 ; genEndFunction
+      000085 81               [ 4]  315 	ret
+                                    316 ;	./src/main.c: 36: int main(void) {
+                                    317 ; genLabel
+                                    318 ;	-----------------------------------------
+                                    319 ;	 function main
+                                    320 ;	-----------------------------------------
+                                    321 ;	Register assignment might be sub-optimal.
+                                    322 ;	Stack space usage: 12 bytes.
+      000086                        323 _main:
+      000086 52 0C            [ 2]  324 	sub	sp, #12
+                                    325 ;	./src/main.c: 37: uint32_t time = 0;
+                                    326 ; genAssign
+      000088 5F               [ 1]  327 	clrw	x
+      000089 1F 07            [ 2]  328 	ldw	(0x07, sp), x
+      00008B 1F 05            [ 2]  329 	ldw	(0x05, sp), x
+                                    330 ;	./src/main.c: 39: init();
+                                    331 ; genCall
+      00008D CDr00r42         [ 4]  332 	call	_init
+                                    333 ;	./src/main.c: 41: while (1) {
+                                    334 ; genLabel
+      000090                        335 00104$:
+                                    336 ;	./src/main.c: 42: if (milis() - time > 1111) {
+                                    337 ; genCall
+      000090 CDr00r00         [ 4]  338 	call	_milis
+      000093 1F 03            [ 2]  339 	ldw	(0x03, sp), x
+      000095 17 01            [ 2]  340 	ldw	(0x01, sp), y
+                                    341 ; genMinus
+      000097 1E 03            [ 2]  342 	ldw	x, (0x03, sp)
+      000099 72 F0 07         [ 2]  343 	subw	x, (0x07, sp)
+      00009C 1F 0B            [ 2]  344 	ldw	(0x0b, sp), x
+      00009E 7B 02            [ 1]  345 	ld	a, (0x02, sp)
+      0000A0 12 06            [ 1]  346 	sbc	a, (0x06, sp)
+      0000A2 6B 0A            [ 1]  347 	ld	(0x0a, sp), a
+      0000A4 7B 01            [ 1]  348 	ld	a, (0x01, sp)
+      0000A6 12 05            [ 1]  349 	sbc	a, (0x05, sp)
+      0000A8 6B 09            [ 1]  350 	ld	(0x09, sp), a
+                                    351 ; genCmp
+                                    352 ; genCmpTnz
+      0000AA AE 04 57         [ 2]  353 	ldw	x, #0x0457
+      0000AD 13 0B            [ 2]  354 	cpw	x, (0x0b, sp)
+      0000AF 4F               [ 1]  355 	clr	a
+      0000B0 12 0A            [ 1]  356 	sbc	a, (0x0a, sp)
+      0000B2 4F               [ 1]  357 	clr	a
+      0000B3 12 09            [ 1]  358 	sbc	a, (0x09, sp)
+      0000B5 25 03            [ 1]  359 	jrc	00122$
+      0000B7 CCr00r90         [ 2]  360 	jp	00104$
+      0000BA                        361 00122$:
+                                    362 ; skipping generated iCode
+                                    363 ;	./src/main.c: 43: time = milis();
+                                    364 ; genCall
+      0000BA CDr00r00         [ 4]  365 	call	_milis
+      0000BD 1F 07            [ 2]  366 	ldw	(0x07, sp), x
+      0000BF 17 05            [ 2]  367 	ldw	(0x05, sp), y
+                                    368 ;	./src/main.c: 45: vref = ADC_get(CHANNEL_VREF) * (uint32_t)(5000 + 512)/ 1023;
+                                    369 ; genSend
+      0000C1 A6 0F            [ 1]  370 	ld	a, #0x0f
+                                    371 ; genCall
+      0000C3 CDr00r00         [ 4]  372 	call	_ADC_get
+                                    373 ; genAssign
+                                    374 ; genIPush
+      0000C6 89               [ 2]  375 	pushw	x
+                                    376 ; genSend
+      0000C7 AE 15 88         [ 2]  377 	ldw	x, #0x1588
+                                    378 ; genCall
+      0000CA CDr00r00         [ 4]  379 	call	___muluint2ulong
+      0000CD 5B 02            [ 2]  380 	addw	sp, #2
+                                    381 ; genIPush
+      0000CF 4B FF            [ 1]  382 	push	#0xff
+      0000D1 4B 03            [ 1]  383 	push	#0x03
+      0000D3 4B 00            [ 1]  384 	push	#0x00
+      0000D5 4B 00            [ 1]  385 	push	#0x00
+                                    386 ; genIPush
+      0000D7 89               [ 2]  387 	pushw	x
+      0000D8 90 89            [ 2]  388 	pushw	y
+                                    389 ; genCall
+      0000DA CDr00r00         [ 4]  390 	call	__divulong
+      0000DD 5B 08            [ 2]  391 	addw	sp, #8
+                                    392 ; genCast
+                                    393 ; genAssign
+      0000DF 1F 09            [ 2]  394 	ldw	(0x09, sp), x
+                                    395 ;	./src/main.c: 46: ADC_get(CHANNEL_VTEMP);
+                                    396 ; genSend
+      0000E1 A6 0E            [ 1]  397 	ld	a, #0x0e
+                                    398 ; genCall
+      0000E3 CDr00r00         [ 4]  399 	call	_ADC_get
+                                    400 ;	./src/main.c: 47: ADC_get(CHANNEL_VTEMP);
+                                    401 ; genSend
+      0000E6 A6 0E            [ 1]  402 	ld	a, #0x0e
+                                    403 ; genCall
+      0000E8 CDr00r00         [ 4]  404 	call	_ADC_get
+                                    405 ;	./src/main.c: 48: ADC_get(CHANNEL_VTEMP);
+                                    406 ; genSend
+      0000EB A6 0E            [ 1]  407 	ld	a, #0x0e
+                                    408 ; genCall
+      0000ED CDr00r00         [ 4]  409 	call	_ADC_get
+                                    410 ;	./src/main.c: 49: ADC_get(CHANNEL_VTEMP);
+                                    411 ; genSend
+      0000F0 A6 0E            [ 1]  412 	ld	a, #0x0e
+                                    413 ; genCall
+      0000F2 CDr00r00         [ 4]  414 	call	_ADC_get
+                                    415 ;	./src/main.c: 50: ADC_get(CHANNEL_VTEMP);
+                                    416 ; genSend
+      0000F5 A6 0E            [ 1]  417 	ld	a, #0x0e
+                                    418 ; genCall
+      0000F7 CDr00r00         [ 4]  419 	call	_ADC_get
+                                    420 ;	./src/main.c: 51: ADC_get(CHANNEL_VTEMP);
+                                    421 ; genSend
+      0000FA A6 0E            [ 1]  422 	ld	a, #0x0e
+                                    423 ; genCall
+      0000FC CDr00r00         [ 4]  424 	call	_ADC_get
+                                    425 ;	./src/main.c: 52: ADC_get(CHANNEL_VTEMP);
+                                    426 ; genSend
+      0000FF A6 0E            [ 1]  427 	ld	a, #0x0e
+                                    428 ; genCall
+      000101 CDr00r00         [ 4]  429 	call	_ADC_get
+                                    430 ;	./src/main.c: 53: ADC_get(CHANNEL_VTEMP);
+                                    431 ; genSend
+      000104 A6 0E            [ 1]  432 	ld	a, #0x0e
+                                    433 ; genCall
+      000106 CDr00r00         [ 4]  434 	call	_ADC_get
+                                    435 ;	./src/main.c: 54: vtemp = (uint32_t)ADC_get(CHANNEL_VTEMP) * (5000L + 512) / 1023;
+                                    436 ; genSend
+      000109 A6 0E            [ 1]  437 	ld	a, #0x0e
+                                    438 ; genCall
+      00010B CDr00r00         [ 4]  439 	call	_ADC_get
+                                    440 ; genAssign
+                                    441 ; genIPush
+      00010E 89               [ 2]  442 	pushw	x
+                                    443 ; genSend
+      00010F AE 15 88         [ 2]  444 	ldw	x, #0x1588
+                                    445 ; genCall
+      000112 CDr00r00         [ 4]  446 	call	___muluint2ulong
+      000115 5B 02            [ 2]  447 	addw	sp, #2
+                                    448 ; genIPush
+      000117 4B FF            [ 1]  449 	push	#0xff
+      000119 4B 03            [ 1]  450 	push	#0x03
+      00011B 4B 00            [ 1]  451 	push	#0x00
+      00011D 4B 00            [ 1]  452 	push	#0x00
+                                    453 ; genIPush
+      00011F 89               [ 2]  454 	pushw	x
+      000120 90 89            [ 2]  455 	pushw	y
+                                    456 ; genCall
+      000122 CDr00r00         [ 4]  457 	call	__divulong
+      000125 5B 08            [ 2]  458 	addw	sp, #8
+                                    459 ; genCast
+                                    460 ; genAssign
+      000127 1F 0B            [ 2]  461 	ldw	(0x0b, sp), x
+                                    462 ;	./src/main.c: 56: temp = (100L*vtemp -40000L)/195;
+                                    463 ; genCast
+                                    464 ; genAssign
+      000129 16 0B            [ 2]  465 	ldw	y, (0x0b, sp)
+      00012B 5F               [ 1]  466 	clrw	x
+                                    467 ; genIPush
+      00012C 90 89            [ 2]  468 	pushw	y
+      00012E 89               [ 2]  469 	pushw	x
+                                    470 ; genIPush
+      00012F 4B 64            [ 1]  471 	push	#0x64
+      000131 5F               [ 1]  472 	clrw	x
+      000132 89               [ 2]  473 	pushw	x
+      000133 4B 00            [ 1]  474 	push	#0x00
+                                    475 ; genCall
+      000135 CDr00r00         [ 4]  476 	call	__mullong
+      000138 5B 08            [ 2]  477 	addw	sp, #8
+                                    478 ; genMinus
+      00013A 1D 9C 40         [ 2]  479 	subw	x, #0x9c40
+      00013D 24 02            [ 1]  480 	jrnc	00123$
+      00013F 90 5A            [ 2]  481 	decw	y
+      000141                        482 00123$:
+                                    483 ; genIPush
+      000141 4B C3            [ 1]  484 	push	#0xc3
+      000143 4B 00            [ 1]  485 	push	#0x00
+      000145 4B 00            [ 1]  486 	push	#0x00
+      000147 4B 00            [ 1]  487 	push	#0x00
+                                    488 ; genIPush
+      000149 89               [ 2]  489 	pushw	x
+      00014A 90 89            [ 2]  490 	pushw	y
+                                    491 ; genCall
+      00014C CDr00r00         [ 4]  492 	call	__divslong
+      00014F 5B 08            [ 2]  493 	addw	sp, #8
+                                    494 ; genCast
+                                    495 ; genAssign
+                                    496 ;	./src/main.c: 57: printf("%u mV, %u mV,%u,%u ˚C\n", vref, vtemp,temp/10,temp%10);
+                                    497 ; genCast
+                                    498 ; genAssign
+                                    499 ; genDivMod
+      000151 89               [ 2]  500 	pushw	x
+      000152 90 AE 00 0A      [ 2]  501 	ldw	y, #0x000a
+      000156 65               [ 2]  502 	divw	x, y
+      000157 85               [ 2]  503 	popw	x
+                                    504 ; genDivMod
+      000158 90 89            [ 2]  505 	pushw	y
+      00015A 90 AE 00 0A      [ 2]  506 	ldw	y, #0x000a
+      00015E 65               [ 2]  507 	divw	x, y
+      00015F 90 85            [ 2]  508 	popw	y
+                                    509 ; skipping iCode since result will be rematerialized
+                                    510 ; skipping iCode since result will be rematerialized
+                                    511 ; genIPush
+      000161 90 89            [ 2]  512 	pushw	y
+                                    513 ; genIPush
+      000163 89               [ 2]  514 	pushw	x
+                                    515 ; genIPush
+      000164 1E 0F            [ 2]  516 	ldw	x, (0x0f, sp)
+      000166 89               [ 2]  517 	pushw	x
+                                    518 ; genIPush
+      000167 1E 0F            [ 2]  519 	ldw	x, (0x0f, sp)
+      000169 89               [ 2]  520 	pushw	x
+                                    521 ; genIPush
+      00016A 4Br00            [ 1]  522 	push	#<(___str_0+0)
+      00016C 4Bs00            [ 1]  523 	push	#((___str_0+0) >> 8)
+                                    524 ; genCall
+      00016E CDr00r00         [ 4]  525 	call	_printf
+      000171 5B 0A            [ 2]  526 	addw	sp, #10
+                                    527 ; genGoto
+      000173 CCr00r90         [ 2]  528 	jp	00104$
+                                    529 ; genLabel
+      000176                        530 00106$:
+                                    531 ;	./src/main.c: 60: }
+                                    532 ; genEndFunction
+      000176 5B 0C            [ 2]  533 	addw	sp, #12
+      000178 81               [ 4]  534 	ret
+                                    535 	.area CODE
+                                    536 	.area CONST
+                                    537 	.area CONST
+      000000                        538 ___str_0:
+      000000 25 75 20 6D 56 2C 20   539 	.ascii "%u mV, %u mV,%u,%u "
+             25 75 20 6D 56 2C 25
+             75 2C 25 75 20
+      000013 CB                     540 	.db 0xcb
+      000014 9A                     541 	.db 0x9a
+      000015 43                     542 	.ascii "C"
+      000016 0A                     543 	.db 0x0a
+      000017 00                     544 	.db 0x00
+                                    545 	.area CODE
+                                    546 	.area INITIALIZER
+                                    547 	.area CABS (ABS)

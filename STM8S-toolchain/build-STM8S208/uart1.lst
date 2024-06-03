@@ -1,0 +1,172 @@
+                                      1 ;--------------------------------------------------------
+                                      2 ; File Created by SDCC : free open source ISO C Compiler 
+                                      3 ; Version 4.4.0 #14620 (Linux)
+                                      4 ;--------------------------------------------------------
+                                      5 	.module uart1
+                                      6 	.optsdcc -mstm8
+                                      7 	
+                                      8 ;--------------------------------------------------------
+                                      9 ; Public variables in this module
+                                     10 ;--------------------------------------------------------
+                                     11 	.globl _getchar
+                                     12 	.globl _putchar
+                                     13 	.globl _UART1_GetFlagStatus
+                                     14 	.globl _UART1_SendData8
+                                     15 	.globl _UART1_ReceiveData8
+                                     16 	.globl _UART1_Cmd
+                                     17 	.globl _UART1_Init
+                                     18 	.globl _UART1_DeInit
+                                     19 	.globl _init_uart1
+                                     20 ;--------------------------------------------------------
+                                     21 ; ram data
+                                     22 ;--------------------------------------------------------
+                                     23 	.area DATA
+                                     24 ;--------------------------------------------------------
+                                     25 ; ram data
+                                     26 ;--------------------------------------------------------
+                                     27 	.area INITIALIZED
+                                     28 ;--------------------------------------------------------
+                                     29 ; absolute external ram data
+                                     30 ;--------------------------------------------------------
+                                     31 	.area DABS (ABS)
+                                     32 
+                                     33 ; default segment ordering for linker
+                                     34 	.area HOME
+                                     35 	.area GSINIT
+                                     36 	.area GSFINAL
+                                     37 	.area CONST
+                                     38 	.area INITIALIZER
+                                     39 	.area CODE
+                                     40 
+                                     41 ;--------------------------------------------------------
+                                     42 ; global & static initialisations
+                                     43 ;--------------------------------------------------------
+                                     44 	.area HOME
+                                     45 	.area GSINIT
+                                     46 	.area GSFINAL
+                                     47 	.area GSINIT
+                                     48 ;--------------------------------------------------------
+                                     49 ; Home
+                                     50 ;--------------------------------------------------------
+                                     51 	.area HOME
+                                     52 	.area HOME
+                                     53 ;--------------------------------------------------------
+                                     54 ; code
+                                     55 ;--------------------------------------------------------
+                                     56 	.area CODE
+                                     57 ;	./src/uart1.c: 13: void init_uart1(void)
+                                     58 ; genLabel
+                                     59 ;	-----------------------------------------
+                                     60 ;	 function init_uart1
+                                     61 ;	-----------------------------------------
+                                     62 ;	Register assignment is optimal.
+                                     63 ;	Stack space usage: 0 bytes.
+      000000                         64 _init_uart1:
+                                     65 ;	./src/uart1.c: 15: UART1_DeInit();
+                                     66 ; genCall
+      000000 CDr00r00         [ 4]   67 	call	_UART1_DeInit
+                                     68 ;	./src/uart1.c: 17: UART1_Init((uint32_t) 115200,       // - BaudRate = 115200 baud  
+                                     69 ; genIPush
+      000003 4B 0C            [ 1]   70 	push	#0x0c
+                                     71 ; genIPush
+      000005 4B 80            [ 1]   72 	push	#0x80
+                                     73 ; genIPush
+      000007 4B 00            [ 1]   74 	push	#0x00
+                                     75 ; genIPush
+      000009 4B 00            [ 1]   76 	push	#0x00
+                                     77 ; genIPush
+      00000B 4B 00            [ 1]   78 	push	#0x00
+                                     79 ; genIPush
+      00000D 4B 00            [ 1]   80 	push	#0x00
+      00000F 4B C2            [ 1]   81 	push	#0xc2
+      000011 4B 01            [ 1]   82 	push	#0x01
+      000013 4B 00            [ 1]   83 	push	#0x00
+                                     84 ; genCall
+      000015 CDr00r00         [ 4]   85 	call	_UART1_Init
+                                     86 ;	./src/uart1.c: 24: UART1_Cmd(ENABLE);
+                                     87 ; genSend
+      000018 A6 01            [ 1]   88 	ld	a, #0x01
+                                     89 ; genCall
+      00001A CCr00r00         [ 2]   90 	jp	_UART1_Cmd
+                                     91 ; genLabel
+      00001D                         92 00101$:
+                                     93 ;	./src/uart1.c: 25: }
+                                     94 ; genEndFunction
+      00001D 81               [ 4]   95 	ret
+                                     96 ;	./src/uart1.c: 28: PUTCHAR_PROTOTYPE {
+                                     97 ; genLabel
+                                     98 ;	-----------------------------------------
+                                     99 ;	 function putchar
+                                    100 ;	-----------------------------------------
+                                    101 ;	Register assignment is optimal.
+                                    102 ;	Stack space usage: 0 bytes.
+      00001E                        103 _putchar:
+                                    104 ; genReceive
+                                    105 ;	./src/uart1.c: 30: UART1_SendData8(c);
+                                    106 ; genCast
+                                    107 ; genAssign
+      00001E 9F               [ 1]  108 	ld	a, xl
+                                    109 ; genSend
+      00001F 89               [ 2]  110 	pushw	x
+                                    111 ; genCall
+      000020 CDr00r00         [ 4]  112 	call	_UART1_SendData8
+      000023 85               [ 2]  113 	popw	x
+                                    114 ;	./src/uart1.c: 32: while (UART1_GetFlagStatus(UART1_FLAG_TXE) == RESET){
+                                    115 ; genLabel
+      000024                        116 00101$:
+                                    117 ; genSend
+      000024 89               [ 2]  118 	pushw	x
+      000025 AE 00 80         [ 2]  119 	ldw	x, #0x0080
+                                    120 ; genCall
+      000028 CDr00r00         [ 4]  121 	call	_UART1_GetFlagStatus
+      00002B 85               [ 2]  122 	popw	x
+                                    123 ; genIfx
+      00002C 4D               [ 1]  124 	tnz	a
+      00002D 26 03            [ 1]  125 	jrne	00120$
+      00002F CCr00r24         [ 2]  126 	jp	00101$
+      000032                        127 00120$:
+                                    128 ;	./src/uart1.c: 35: return (c);
+                                    129 ; genReturn
+                                    130 ; genLabel
+      000032                        131 00104$:
+                                    132 ;	./src/uart1.c: 36: }
+                                    133 ; genEndFunction
+      000032 81               [ 4]  134 	ret
+                                    135 ;	./src/uart1.c: 43: GETCHAR_PROTOTYPE {
+                                    136 ; genLabel
+                                    137 ;	-----------------------------------------
+                                    138 ;	 function getchar
+                                    139 ;	-----------------------------------------
+                                    140 ;	Register assignment is optimal.
+                                    141 ;	Stack space usage: 0 bytes.
+      000033                        142 _getchar:
+                                    143 ;	./src/uart1.c: 50: while (UART1_GetFlagStatus(UART1_FLAG_RXNE) == RESET) {
+                                    144 ; genLabel
+      000033                        145 00101$:
+                                    146 ; genSend
+      000033 AE 00 20         [ 2]  147 	ldw	x, #0x0020
+                                    148 ; genCall
+      000036 CDr00r00         [ 4]  149 	call	_UART1_GetFlagStatus
+                                    150 ; genIfx
+      000039 4D               [ 1]  151 	tnz	a
+      00003A 26 03            [ 1]  152 	jrne	00120$
+      00003C CCr00r33         [ 2]  153 	jp	00101$
+      00003F                        154 00120$:
+                                    155 ;	./src/uart1.c: 53: c = UART1_ReceiveData8();
+                                    156 ; genCall
+      00003F CDr00r00         [ 4]  157 	call	_UART1_ReceiveData8
+                                    158 ; genCast
+                                    159 ; genAssign
+      000042 5F               [ 1]  160 	clrw	x
+                                    161 ;	./src/uart1.c: 54: return (c);
+                                    162 ; genReturn
+      000043 97               [ 1]  163 	ld	xl, a
+                                    164 ; genLabel
+      000044                        165 00104$:
+                                    166 ;	./src/uart1.c: 55: }
+                                    167 ; genEndFunction
+      000044 81               [ 4]  168 	ret
+                                    169 	.area CODE
+                                    170 	.area CONST
+                                    171 	.area INITIALIZER
+                                    172 	.area CABS (ABS)

@@ -1,0 +1,318 @@
+                                      1 ;--------------------------------------------------------
+                                      2 ; File Created by SDCC : free open source ISO C Compiler 
+                                      3 ; Version 4.4.0 #14620 (Linux)
+                                      4 ;--------------------------------------------------------
+                                      5 	.module adc_helper
+                                      6 	.optsdcc -mstm8
+                                      7 	
+                                      8 ;--------------------------------------------------------
+                                      9 ; Public variables in this module
+                                     10 ;--------------------------------------------------------
+                                     11 	.globl _ADC2_GetConversionValue
+                                     12 	.globl _ADC_get
+                                     13 	.globl _ADC2_Select_Channel
+                                     14 	.globl _ADC2_AlignConfig
+                                     15 	.globl _ADC2_Startup_Wait
+                                     16 ;--------------------------------------------------------
+                                     17 ; ram data
+                                     18 ;--------------------------------------------------------
+                                     19 	.area DATA
+                                     20 ;--------------------------------------------------------
+                                     21 ; ram data
+                                     22 ;--------------------------------------------------------
+                                     23 	.area INITIALIZED
+                                     24 ;--------------------------------------------------------
+                                     25 ; absolute external ram data
+                                     26 ;--------------------------------------------------------
+                                     27 	.area DABS (ABS)
+                                     28 
+                                     29 ; default segment ordering for linker
+                                     30 	.area HOME
+                                     31 	.area GSINIT
+                                     32 	.area GSFINAL
+                                     33 	.area CONST
+                                     34 	.area INITIALIZER
+                                     35 	.area CODE
+                                     36 
+                                     37 ;--------------------------------------------------------
+                                     38 ; global & static initialisations
+                                     39 ;--------------------------------------------------------
+                                     40 	.area HOME
+                                     41 	.area GSINIT
+                                     42 	.area GSFINAL
+                                     43 	.area GSINIT
+                                     44 ;--------------------------------------------------------
+                                     45 ; Home
+                                     46 ;--------------------------------------------------------
+                                     47 	.area HOME
+                                     48 	.area HOME
+                                     49 ;--------------------------------------------------------
+                                     50 ; code
+                                     51 ;--------------------------------------------------------
+                                     52 	.area CODE
+                                     53 ;	inc/delay.h: 18: static @inline void _delay_cycl( unsigned short __ticks )
+                                     54 ; genLabel
+                                     55 ;	-----------------------------------------
+                                     56 ;	 function _delay_cycl
+                                     57 ;	-----------------------------------------
+                                     58 ;	Register assignment is optimal.
+                                     59 ;	Stack space usage: 0 bytes.
+      000000                         60 __delay_cycl:
+                                     61 ; genReceive
+                                     62 ;	inc/delay.h: 29: __asm__("nop\n nop\n"); 
+                                     63 ;	genInline
+      000000 9D               [ 1]   64 	nop
+      000001 9D               [ 1]   65 	nop
+                                     66 ;	inc/delay.h: 30: do { 		// ASM: ldw X, #tick; lab$: decw X; tnzw X; jrne lab$
+                                     67 ; genAssign
+                                     68 ; genLabel
+      000002                         69 00101$:
+                                     70 ;	inc/delay.h: 31: __ticks--;//      2c;                 1c;     2c    ; 1/2c   
+                                     71 ; genMinus
+      000002 5A               [ 2]   72 	decw	x
+                                     73 ;	inc/delay.h: 32: } while ( __ticks );
+                                     74 ; genIfx
+      000003 5D               [ 2]   75 	tnzw	x
+      000004 27 03            [ 1]   76 	jreq	00121$
+      000006 CCr00r02         [ 2]   77 	jp	00101$
+      000009                         78 00121$:
+                                     79 ;	inc/delay.h: 33: __asm__("nop\n");
+                                     80 ;	genInline
+      000009 9D               [ 1]   81 	nop
+                                     82 ; genLabel
+      00000A                         83 00104$:
+                                     84 ;	inc/delay.h: 43: }
+                                     85 ; genEndFunction
+      00000A 81               [ 4]   86 	ret
+                                     87 ;	inc/delay.h: 45: static @inline void _delay_us( const unsigned short __us ){
+                                     88 ; genLabel
+                                     89 ;	-----------------------------------------
+                                     90 ;	 function _delay_us
+                                     91 ;	-----------------------------------------
+                                     92 ;	Register assignment might be sub-optimal.
+                                     93 ;	Stack space usage: 0 bytes.
+      00000B                         94 __delay_us:
+                                     95 ; genReceive
+                                     96 ;	inc/delay.h: 46: _delay_cycl( (unsigned short)( T_COUNT(__us) ));
+                                     97 ; genCast
+                                     98 ; genAssign
+      00000B 90 5F            [ 1]   99 	clrw	y
+                                    100 ; genIPush
+      00000D 89               [ 2]  101 	pushw	x
+      00000E 90 89            [ 2]  102 	pushw	y
+                                    103 ; genIPush
+      000010 4B 00            [ 1]  104 	push	#0x00
+      000012 4B 24            [ 1]  105 	push	#0x24
+      000014 4B F4            [ 1]  106 	push	#0xf4
+      000016 4B 00            [ 1]  107 	push	#0x00
+                                    108 ; genCall
+      000018 CDr00r00         [ 4]  109 	call	__mullong
+      00001B 5B 08            [ 2]  110 	addw	sp, #8
+                                    111 ; genCast
+                                    112 ; genAssign
+                                    113 ; genIPush
+      00001D 4B 40            [ 1]  114 	push	#0x40
+      00001F 4B 42            [ 1]  115 	push	#0x42
+      000021 4B 0F            [ 1]  116 	push	#0x0f
+      000023 4B 00            [ 1]  117 	push	#0x00
+                                    118 ; genIPush
+      000025 89               [ 2]  119 	pushw	x
+      000026 90 89            [ 2]  120 	pushw	y
+                                    121 ; genCall
+      000028 CDr00r00         [ 4]  122 	call	__divulong
+      00002B 5B 08            [ 2]  123 	addw	sp, #8
+                                    124 ; genRightShiftLiteral
+      00002D 90 54            [ 2]  125 	srlw	y
+      00002F 56               [ 2]  126 	rrcw	x
+      000030 90 54            [ 2]  127 	srlw	y
+      000032 56               [ 2]  128 	rrcw	x
+      000033 90 54            [ 2]  129 	srlw	y
+      000035 56               [ 2]  130 	rrcw	x
+                                    131 ; genCast
+                                    132 ; genAssign
+                                    133 ; genPlus
+      000036 5C               [ 1]  134 	incw	x
+                                    135 ;	inc/delay.h: 29: __asm__("nop\n nop\n"); 
+                                    136 ;	genInline
+      000037 9D               [ 1]  137 	nop
+      000038 9D               [ 1]  138 	nop
+                                    139 ;	inc/delay.h: 30: do { 		// ASM: ldw X, #tick; lab$: decw X; tnzw X; jrne lab$
+                                    140 ; genAssign
+                                    141 ; genLabel
+      000039                        142 00101$:
+                                    143 ;	inc/delay.h: 31: __ticks--;//      2c;                 1c;     2c    ; 1/2c   
+                                    144 ; genMinus
+      000039 5A               [ 2]  145 	decw	x
+                                    146 ;	inc/delay.h: 32: } while ( __ticks );
+                                    147 ; genIfx
+      00003A 5D               [ 2]  148 	tnzw	x
+      00003B 27 03            [ 1]  149 	jreq	00122$
+      00003D CCr00r39         [ 2]  150 	jp	00101$
+      000040                        151 00122$:
+                                    152 ;	inc/delay.h: 33: __asm__("nop\n");
+                                    153 ;	genInline
+      000040 9D               [ 1]  154 	nop
+                                    155 ;	inc/delay.h: 46: _delay_cycl( (unsigned short)( T_COUNT(__us) ));
+                                    156 ; genLabel
+      000041                        157 00105$:
+                                    158 ;	inc/delay.h: 47: }
+                                    159 ; genEndFunction
+      000041 81               [ 4]  160 	ret
+                                    161 ;	./src/adc_helper.c: 10: uint16_t ADC_get(ADC2_Channel_TypeDef ADC2_Channel)
+                                    162 ; genLabel
+                                    163 ;	-----------------------------------------
+                                    164 ;	 function ADC_get
+                                    165 ;	-----------------------------------------
+                                    166 ;	Register assignment is optimal.
+                                    167 ;	Stack space usage: 0 bytes.
+      000042                        168 _ADC_get:
+                                    169 ; genReceive
+                                    170 ;	./src/adc_helper.c: 12: ADC2_Select_Channel(ADC2_Channel);  // vybere kanál / nastavuje analogový multiplexer
+                                    171 ; genSend
+                                    172 ; genCall
+      000042 CDr00r62         [ 4]  173 	call	_ADC2_Select_Channel
+                                    174 ;	./src/adc_helper.c: 13: ADC2->CR1 |= ADC2_CR1_ADON; // Start Conversion (ADON must be SET before => ADC must be enabled !)
+                                    175 ; genPointerGet
+      000045 C6 54 01         [ 1]  176 	ld	a, 0x5401
+                                    177 ; genOr
+      000048 AA 01            [ 1]  178 	or	a, #0x01
+                                    179 ; genPointerSet
+      00004A C7 54 01         [ 1]  180 	ld	0x5401, a
+                                    181 ;	./src/adc_helper.c: 14: while (!(ADC2->CSR & ADC2_CSR_EOC));        // čeká na dokončení převodu (End Of Conversion)
+                                    182 ; genLabel
+      00004D                        183 00101$:
+                                    184 ; genPointerGet
+      00004D C6 54 00         [ 1]  185 	ld	a, 0x5400
+                                    186 ; genAnd
+      000050 4D               [ 1]  187 	tnz	a
+      000051 2B 03            [ 1]  188 	jrmi	00120$
+      000053 CCr00r4D         [ 2]  189 	jp	00101$
+      000056                        190 00120$:
+                                    191 ; skipping generated iCode
+                                    192 ;	./src/adc_helper.c: 15: ADC2->CSR &= ~ADC2_CSR_EOC; // maže vlajku 
+                                    193 ; genPointerGet
+      000056 C6 54 00         [ 1]  194 	ld	a, 0x5400
+                                    195 ; genAnd
+      000059 A4 7F            [ 1]  196 	and	a, #0x7f
+                                    197 ; genPointerSet
+      00005B C7 54 00         [ 1]  198 	ld	0x5400, a
+                                    199 ;	./src/adc_helper.c: 16: return ADC2_GetConversionValue();   // vrací výsledek
+                                    200 ; genCall
+      00005E CCr00r00         [ 2]  201 	jp	_ADC2_GetConversionValue
+                                    202 ; genReturn
+                                    203 ; genLabel
+      000061                        204 00104$:
+                                    205 ;	./src/adc_helper.c: 17: }
+                                    206 ; genEndFunction
+      000061 81               [ 4]  207 	ret
+                                    208 ;	./src/adc_helper.c: 22: void ADC2_Select_Channel(ADC2_Channel_TypeDef ADC2_Channel)
+                                    209 ; genLabel
+                                    210 ;	-----------------------------------------
+                                    211 ;	 function ADC2_Select_Channel
+                                    212 ;	-----------------------------------------
+                                    213 ;	Register assignment is optimal.
+                                    214 ;	Stack space usage: 1 bytes.
+      000062                        215 _ADC2_Select_Channel:
+      000062 88               [ 1]  216 	push	a
+                                    217 ; genReceive
+      000063 97               [ 1]  218 	ld	xl, a
+                                    219 ;	./src/adc_helper.c: 24: uint8_t tmp = (ADC2->CSR) & (~ADC2_CSR_CH);
+                                    220 ; genPointerGet
+      000064 C6 54 00         [ 1]  221 	ld	a, 0x5400
+                                    222 ; genAnd
+      000067 A4 F0            [ 1]  223 	and	a, #0xf0
+      000069 6B 01            [ 1]  224 	ld	(0x01, sp), a
+                                    225 ;	./src/adc_helper.c: 25: tmp |= ADC2_Channel | ADC2_CSR_EOC;
+                                    226 ; genOr
+      00006B 9F               [ 1]  227 	ld	a, xl
+      00006C AA 80            [ 1]  228 	or	a, #0x80
+                                    229 ; genOr
+      00006E 1A 01            [ 1]  230 	or	a, (0x01, sp)
+                                    231 ;	./src/adc_helper.c: 26: ADC2->CSR = tmp;
+                                    232 ; genPointerSet
+      000070 C7 54 00         [ 1]  233 	ld	0x5400, a
+                                    234 ; genLabel
+      000073                        235 00101$:
+                                    236 ;	./src/adc_helper.c: 27: }
+                                    237 ; genEndFunction
+      000073 84               [ 1]  238 	pop	a
+      000074 81               [ 4]  239 	ret
+                                    240 ;	./src/adc_helper.c: 32: void ADC2_AlignConfig(ADC2_Align_TypeDef ADC2_Align)
+                                    241 ; genLabel
+                                    242 ;	-----------------------------------------
+                                    243 ;	 function ADC2_AlignConfig
+                                    244 ;	-----------------------------------------
+                                    245 ;	Register assignment is optimal.
+                                    246 ;	Stack space usage: 1 bytes.
+      000075                        247 _ADC2_AlignConfig:
+      000075 88               [ 1]  248 	push	a
+                                    249 ; genReceive
+      000076 6B 01            [ 1]  250 	ld	(0x01, sp), a
+                                    251 ;	./src/adc_helper.c: 35: ADC2->CR2 |= (uint8_t) (ADC2_Align);
+                                    252 ; genPointerGet
+      000078 C6 54 02         [ 1]  253 	ld	a, 0x5402
+                                    254 ;	./src/adc_helper.c: 34: if (ADC2_Align) {
+                                    255 ; genIfx
+      00007B 0D 01            [ 1]  256 	tnz	(0x01, sp)
+      00007D 26 03            [ 1]  257 	jrne	00113$
+      00007F CCr00r8A         [ 2]  258 	jp	00102$
+      000082                        259 00113$:
+                                    260 ;	./src/adc_helper.c: 35: ADC2->CR2 |= (uint8_t) (ADC2_Align);
+                                    261 ; genOr
+      000082 1A 01            [ 1]  262 	or	a, (0x01, sp)
+                                    263 ; genPointerSet
+      000084 C7 54 02         [ 1]  264 	ld	0x5402, a
+                                    265 ; genGoto
+      000087 CCr00r8F         [ 2]  266 	jp	00104$
+                                    267 ; genLabel
+      00008A                        268 00102$:
+                                    269 ;	./src/adc_helper.c: 37: ADC2->CR2 &= (uint8_t) (~ADC2_CR2_ALIGN);
+                                    270 ; genAnd
+      00008A A4 F7            [ 1]  271 	and	a, #0xf7
+                                    272 ; genPointerSet
+      00008C C7 54 02         [ 1]  273 	ld	0x5402, a
+                                    274 ; genLabel
+      00008F                        275 00104$:
+                                    276 ;	./src/adc_helper.c: 39: }
+                                    277 ; genEndFunction
+      00008F 84               [ 1]  278 	pop	a
+      000090 81               [ 4]  279 	ret
+                                    280 ;	./src/adc_helper.c: 43: void ADC2_Startup_Wait(void)
+                                    281 ; genLabel
+                                    282 ;	-----------------------------------------
+                                    283 ;	 function ADC2_Startup_Wait
+                                    284 ;	-----------------------------------------
+                                    285 ;	Register assignment is optimal.
+                                    286 ;	Stack space usage: 0 bytes.
+      000091                        287 _ADC2_Startup_Wait:
+                                    288 ;	inc/delay.h: 29: __asm__("nop\n nop\n"); 
+                                    289 ;	genInline
+      000091 9D               [ 1]  290 	nop
+      000092 9D               [ 1]  291 	nop
+                                    292 ;	inc/delay.h: 30: do { 		// ASM: ldw X, #tick; lab$: decw X; tnzw X; jrne lab$
+                                    293 ; genAssign
+      000093 AE 00 0F         [ 2]  294 	ldw	x, #0x000f
+                                    295 ; genLabel
+      000096                        296 00101$:
+                                    297 ;	inc/delay.h: 31: __ticks--;//      2c;                 1c;     2c    ; 1/2c   
+                                    298 ; genMinus
+      000096 5A               [ 2]  299 	decw	x
+                                    300 ;	inc/delay.h: 32: } while ( __ticks );
+                                    301 ; genIfx
+      000097 5D               [ 2]  302 	tnzw	x
+      000098 27 03            [ 1]  303 	jreq	00123$
+      00009A CCr00r96         [ 2]  304 	jp	00101$
+      00009D                        305 00123$:
+                                    306 ;	inc/delay.h: 33: __asm__("nop\n");
+                                    307 ;	genInline
+      00009D 9D               [ 1]  308 	nop
+                                    309 ;	./src/adc_helper.c: 45: _delay_us(ADC_TSTAB);
+                                    310 ; genLabel
+      00009E                        311 00106$:
+                                    312 ;	./src/adc_helper.c: 46: }
+                                    313 ; genEndFunction
+      00009E 81               [ 4]  314 	ret
+                                    315 	.area CODE
+                                    316 	.area CONST
+                                    317 	.area INITIALIZER
+                                    318 	.area CABS (ABS)
